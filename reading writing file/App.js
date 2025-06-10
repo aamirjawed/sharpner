@@ -1,0 +1,38 @@
+const http = require('http')
+
+
+const server = http.createServer((req,res) =>{
+    const url = req.url;
+    const method = req.method
+
+    if(req.url === "/"){
+        res.setHeader('Content-Type','text/html')
+        res.end(
+            `
+                <form action="/message" method="POST">
+                    <label for="username">Name: </label>
+                    <input type="text" id="username" name="username" />
+                    <button type="submit">Add</button>
+                </form>
+            `
+        )
+    }else if(url==='/message' && method ==="POST"){
+        let body = []
+        req.on('data', (chunk) => {
+            body.push(chunk)
+        });
+
+        req.on('end', () => {
+            const parsedBody = Buffer.concat(body).toString()
+            const username = parsedBody.split('=')[1]
+            res.setHeader('Content-Type', 'text/html')
+            res.end(`<h1>${decodeURIComponent(username).replace(/\+/g, ' ')}</h1>`)
+
+        })
+
+    }
+})
+
+server.listen(3000, ()=>{
+    console.log("Server is running")
+})
